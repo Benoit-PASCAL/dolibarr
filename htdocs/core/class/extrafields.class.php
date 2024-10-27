@@ -79,6 +79,7 @@ class ExtraFields
 		'double'=>'Float',
 		'date'=>'Date',
 		'datetime'=>'DateAndTime',
+        'duration' => 'Duration',
 		//'datetimegmt'=>'DateAndTimeUTC',
 		'boolean'=>'Boolean',
 		'price'=>'ExtrafieldPrice',
@@ -116,7 +117,7 @@ class ExtraFields
 	 *
 	 *  @param	string			$attrname           Code of attribute
 	 *  @param  string			$label              label of attribute
-	 *  @param  string			$type               Type of attribute ('boolean','int','varchar','text','html','date','datetime','price', 'pricecy', 'phone','mail','password','url','select','checkbox','separate',...)
+	 *  @param  string			$type               Type of attribute ('boolean','int','varchar','text','html','date','datetime', 'duration', 'price', 'pricecy', 'phone','mail','password','url','select','checkbox','separate',...)
 	 *  @param  int				$pos                Position of attribute
 	 *  @param  string			$size               Size/length definition of attribute ('5', '24,8', ...). For float, it contains 2 numeric separated with a comma.
 	 *  @param  string			$elementtype        Element type. Same value than object->table_element (Example 'member', 'product', 'thirdparty', ...)
@@ -191,7 +192,7 @@ class ExtraFields
 	 *  This is a private method. For public method, use addExtraField.
 	 *
 	 *	@param	string	$attrname			code of attribute
-	 *  @param	string	$type				Type of attribute ('boolean', 'int', 'varchar', 'text', 'html', 'date', 'datetime', 'price', 'pricecy', 'phone', 'mail', 'password', 'url', 'select', 'checkbox', ...)
+	 *  @param	string	$type				Type of attribute ('boolean', 'int', 'varchar', 'text', 'html', 'date', 'datetime', 'duration', 'price', 'pricecy', 'phone', 'mail', 'password', 'url', 'select', 'checkbox', ...)
 	 *  @param	string	$length				Size/length of attribute ('5', '24,8', ...)
 	 *  @param  string	$elementtype        Element type ('member', 'product', 'thirdparty', 'contact', ...)
 	 *  @param	int		$unique				Is field unique or not
@@ -242,9 +243,12 @@ class ExtraFields
 				$typedb = 'varchar';
 				$lengthdb = '255';
 			} elseif ($type == 'link') {
-				$typedb = 'int';
-				$lengthdb = '11';
-			} elseif ($type == 'html') {
+                $typedb = 'int';
+                $lengthdb = '11';
+            } elseif ($type == 'duration') {
+                $typedb = 'int';
+                $lengthdb = '11';
+            } elseif ($type == 'html') {
 				$typedb = 'text';
 				$lengthdb = $length;
 			} elseif ($type == 'password') {
@@ -535,7 +539,7 @@ class ExtraFields
 	 *
 	 *  @param	string	$attrname			Name of attribute
 	 *  @param	string	$label				Label of attribute
-	 *  @param	string	$type				Type of attribute ('boolean', 'int', 'varchar', 'text', 'html', 'date', 'datetime','price','phone','mail','password','url','select','checkbox', ...)
+	 *  @param	string	$type				Type of attribute ('boolean', 'int', 'varchar', 'text', 'html', 'date', 'datetime', 'duration', 'price','phone','mail','password','url','select','checkbox', ...)
 	 *  @param	int		$length				Length of attribute
 	 *  @param  string	$elementtype        Element type ('member', 'product', 'thirdparty', 'contact', ...)
 	 *  @param	int		$unique				Is field unique or not
@@ -1159,11 +1163,13 @@ class ExtraFields
 			$out = '<input type="text" class="flat '.$morecss.' maxwidthonsmartphone" name="'.$keyprefix.$key.$keysuffix.'" id="'.$keyprefix.$key.$keysuffix.'" value="'.$value.'" '.($moreparam ? $moreparam : '').'> ';
 			$out .= $form->selectCurrency($currency, $keyprefix.$key.$keysuffix.'currency_id');
 		} elseif ($type == 'double') {
-			if (!empty($value)) {		// $value in memory is a php numeric, we format it into user number format.
-				$value = price($value);
-			}
-			$out = '<input type="text" class="flat '.$morecss.' maxwidthonsmartphone" name="'.$keyprefix.$key.$keysuffix.'" id="'.$keyprefix.$key.$keysuffix.'" value="'.$value.'" '.($moreparam ? $moreparam : '').'> ';
-		} elseif ($type == 'select') {
+            if (!empty($value)) {		// $value in memory is a php numeric, we format it into user number format.
+                $value = price($value);
+            }
+            $out = '<input type="text" class="flat '.$morecss.' maxwidthonsmartphone" name="'.$keyprefix.$key.$keysuffix.'" id="'.$keyprefix.$key.$keysuffix.'" value="'.$value.'" '.($moreparam ? $moreparam : '').'> ';
+        } elseif ($type == 'duration') {
+            $out = $form->select_duration($keyprefix . $key,$value, 0, 'text','',1);
+        } elseif ($type == 'select') {
 			$out = '';
 			if ($mode) {
 				$options = array();
@@ -1703,7 +1709,12 @@ class ExtraFields
 			if ($value !== '') {
 				$value = dol_print_date($value, 'dayhour', 'gmt');
 			}
-		} elseif ($type == 'int') {
+		} elseif ($type == 'duration') {
+            $showsize = 10;
+            if ($value !== '') {
+                $value = convertSecondToTime($value);
+            }
+        } elseif ($type == 'int') {
 			$showsize = 10;
 		} elseif ($type == 'double') {
 			if (!empty($value)) {
@@ -2024,7 +2035,7 @@ class ExtraFields
 
 		if (in_array($type, array('date', 'datetime', 'datetimegmt',))) {
 			$cssstring = "center";
-		} elseif (in_array($type, array('int', 'price', 'double'))) {
+		} elseif (in_array($type, array('int', 'price', 'double', 'duration'))) {
 			$cssstring = "right";
 		} elseif (in_array($type, array('boolean', 'radio', 'checkbox', 'ip', 'icon'))) {
 			$cssstring = "center";
@@ -2168,7 +2179,7 @@ class ExtraFields
 					continue;
 				}
 
-				if (!empty($onlykey) && $onlykey == '@GETPOSTISSET' && !GETPOSTISSET('options_'.$key) && (! in_array($this->attributes[$object->table_element]['type'][$key], array('boolean', 'checkbox', 'chkbxlst')))) {
+				if (!empty($onlykey) && $onlykey == '@GETPOSTISSET' && !GETPOSTISSET('options_'.$key) && (! in_array($this->attributes[$object->table_element]['type'][$key], array('boolean', 'checkbox', 'chkbxlst', 'duration')))) {
 					//when unticking boolean field, it's not set in POST
 					continue;
 				}
@@ -2238,9 +2249,14 @@ class ExtraFields
 					// Clean parameters
 					$value_key = dol_mktime(GETPOST("options_".$key."hour", 'int'), GETPOST("options_".$key."min", 'int'), GETPOST("options_".$key."sec", 'int'), GETPOST("options_".$key."month", 'int'), GETPOST("options_".$key."day", 'int'), GETPOST("options_".$key."year", 'int'), 'tzuserrel');
 				} elseif (in_array($key_type, array('datetimegmt'))) {
-					// Clean parameters
-					$value_key = dol_mktime(GETPOST("options_".$key."hour", 'int'), GETPOST("options_".$key."min", 'int'), GETPOST("options_".$key."sec", 'int'), GETPOST("options_".$key."month", 'int'), GETPOST("options_".$key."day", 'int'), GETPOST("options_".$key."year", 'int'), 'gmt');
-				} elseif (in_array($key_type, array('checkbox', 'chkbxlst'))) {
+                    // Clean parameters
+                    $value_key = dol_mktime(GETPOST("options_".$key."hour", 'int'), GETPOST("options_".$key."min", 'int'), GETPOST("options_".$key."sec", 'int'), GETPOST("options_".$key."month", 'int'), GETPOST("options_".$key."day", 'int'), GETPOST("options_".$key."year", 'int'), 'gmt');
+                } elseif (in_array($key_type, array('duration'))) {
+                    // Clean parameters
+                    $value_hours = GETPOSTINT("options_" . $key . "hour");
+                    $value_minutes = GETPOSTINT("options_" . $key . "minute");
+                    $value_key = $value_hours * 3600 + $value_minutes * 60;
+                } elseif (in_array($key_type, array('checkbox', 'chkbxlst'))) {
 					$value_arr = GETPOST("options_".$key, 'array'); // check if an array
 					if (!empty($value_arr)) {
 						$value_key = implode(',', $value_arr);
