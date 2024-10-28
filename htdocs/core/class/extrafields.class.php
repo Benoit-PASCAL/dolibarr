@@ -1292,7 +1292,10 @@ class ExtraFields
 			$out = '<input type="text" class="flat '.$morecss.' maxwidthonsmartphone" name="'.$keyprefix.$key.$keysuffix.'" id="'.$keyprefix.$key.$keysuffix.'" value="'.$value.'" '.($moreparam ? $moreparam : '').'> ';
 			$out .= $form->selectCurrency($currency, $keyprefix.$key.$keysuffix.'currency_id');
 		} elseif ($type == 'duration') {
-			$out = $form->select_duration($keyprefix . $key, $value, 0, 'text', '', 1);
+			if (!empty($value)) {
+				$value = intval($value);
+			}
+			$out = $form->select_duration($keyprefix . $key, $value, 0, 'text', 0, 1);
 		} elseif ($type == 'double') {
 			if (!empty($value)) {		// $value in memory is a php numeric, we format it into user number format.
 				$value = price($value);
