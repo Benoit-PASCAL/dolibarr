@@ -121,7 +121,7 @@ class ExtraFields
 	 *
 	 *  @param	string			$attrname           Code of attribute
 	 *  @param  string			$label              label of attribute
-	 *  @param  string			$type               Type of attribute ('boolean','int','varchar','text','html','date','datetime', 'duration', 'price', 'pricecy', 'phone','mail','password','url','select','checkbox','separate',...)
+	 *  @param  string			$type               Type of attribute ('boolean', 'int', 'varchar', 'text', 'html', 'date', 'datetime', 'duration', 'price', 'pricecy', 'phone', 'mail', 'password', 'url', 'select', 'checkbox', 'separate',...)
 	 *  @param  int				$pos                Position of attribute
 	 *  @param  string			$size               Size/length definition of attribute ('5', '24,8', ...). For float, it contains 2 numeric separated with a comma.
 	 *  @param  string			$elementtype        Element type. Same value than object->table_element (Example 'member', 'product', 'thirdparty', ...)
@@ -197,7 +197,7 @@ class ExtraFields
 	 *
 	 *  @param  string			$attrname           Code of attribute
 	 *  @param  string			$label              label of attribute
-	 *  @param  string			$type               Type of attribute ('boolean','int','varchar','text','html','date','datetime', 'duration', 'price', 'pricecy', 'phone','mail','password','url','select','checkbox','separate',...)
+	 *  @param  string			$type               Type of attribute ('boolean', 'int', 'varchar', 'text', 'html', 'date', 'datetime', 'duration', 'price', 'pricecy', 'phone', 'mail', 'password', 'url', 'select', 'checkbox', 'separate',...)
 	 *  @param  int				$pos                Position of attribute
 	 *  @param  string			$size               Size/length definition of attribute ('5', '24,8', ...). For float, it contains 2 numeric separated with a comma.
 	 *  @param  string			$elementtype        Element type. Same value than object->table_element (Example 'member', 'product', 'thirdparty', ...)
@@ -639,7 +639,7 @@ class ExtraFields
 	 *
 	 *  @param	string	$attrname			Name of attribute
 	 *  @param	string	$label				Label of attribute
-	 *  @param	string	$type				Type of attribute ('boolean', 'int', 'varchar', 'text', 'html', 'date', 'datetime', 'duration', 'price','phone','mail','password','url','select','checkbox', ...)
+	 *  @param	string	$type				Type of attribute ('boolean', 'int', 'varchar', 'text', 'html', 'date', 'datetime', 'duration', 'price', 'phone', 'mail', 'password', 'url', 'select', 'checkbox', ...)
 	 *  @param	string	$length				Size/length of attribute ('5', '24,8', ...)
 	 *  @param  string	$elementtype        Element type ('member', 'product', 'thirdparty', 'contact', ...)
 	 *  @param	int<0,1>	$unique			Is field unique or not
@@ -1292,7 +1292,7 @@ class ExtraFields
 			$out = '<input type="text" class="flat '.$morecss.' maxwidthonsmartphone" name="'.$keyprefix.$key.$keysuffix.'" id="'.$keyprefix.$key.$keysuffix.'" value="'.$value.'" '.($moreparam ? $moreparam : '').'> ';
 			$out .= $form->selectCurrency($currency, $keyprefix.$key.$keysuffix.'currency_id');
 		} elseif ($type == 'duration') {
-			$out = $form->select_duration($keyprefix . $key,$value,0,'text','',1);
+			$out = $form->select_duration($keyprefix . $key,$value, 0, 'text', '', 1);
 		} elseif ($type == 'double') {
 			if (!empty($value)) {		// $value in memory is a php numeric, we format it into user number format.
 				$value = price($value);
@@ -2305,7 +2305,7 @@ class ExtraFields
 			} else {
 				$value = '';
 			}
-		} elseif (in_array($type, ['multipts','linestrg', 'polygon'])) {
+		} elseif (in_array($type, ['multipts', 'linestrg', 'polygon'])) {
 			if (!empty($value)) {
 				require_once DOL_DOCUMENT_ROOT.'/core/class/dolgeophp.class.php';
 				$dolgeophp = new DolGeoPHP($this->db);
