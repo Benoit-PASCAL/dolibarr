@@ -2004,6 +2004,7 @@ class ExtraFields
 		} elseif ($type == 'duration') {
 			$showsize = 10;
 			if ($value !== '') {
+				$value = intval($value);
 				$value = convertSecondToTime($value);
 			}
 		} elseif ($type == 'datetimegmt') {
