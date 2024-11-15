@@ -565,12 +565,10 @@ function societe_admin_prepare_head()
 	$head[$h][2] = 'attributes_contacts';
 	$h++;
 
-	if (getDolGlobalString('MAIN_FEATURES_LEVEL') >= 1) {
-		$head[$h][0] = dolBuildUrl(DOL_URL_ROOT . '/societe/admin/public_interface.php');
-		$head[$h][1] = $langs->trans("PublicUrl");
-		$head[$h][2] = 'publicurl';
-		$h++;
-	}
+	$head[$h][0] = DOL_URL_ROOT . '/societe/admin/societe_fields.php';
+	$head[$h][1] = $langs->trans("SetupFields");
+	$head[$h][2] = 'fields';
+	$h++;
 
 	complete_head_from_modules($conf, $langs, null, $head, $h, 'company_admin', 'remove');
 

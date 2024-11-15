@@ -909,7 +909,7 @@ class FormSetupItem
 
 		$out = '';
 
-		if ($this->type == 'title') {
+		if ($this->type == 'title' || $this->type == 'noteditable') {
 			$out .= $this->generateOutputField(); // title have no input
 		} elseif ($this->type == 'multiselect') {
 			$out .= $this->generateInputFieldMultiSelect();
@@ -1510,6 +1510,12 @@ class FormSetupItem
 	public function setAsString()
 	{
 		$this->type = 'string';
+		return $this;
+	}
+
+	public function setAsNotEditable()
+	{
+		$this->type = 'noteditable';
 		return $this;
 	}
 
