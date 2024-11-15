@@ -10136,7 +10136,7 @@ abstract class CommonObject
 					}
 				}
 			} elseif ($this->isArray($info)) {
-				if (isset($this->{$field}) && !is_empty($this->{$field})) {
+				if (isset($this->{$field}) && !empty($this->{$field})) {
 					$queryarray[$field] = serialize($this->{$field});
 				} else {
 					$queryarray[$field] = null;
