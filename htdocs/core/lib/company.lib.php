@@ -545,6 +545,11 @@ function societe_admin_prepare_head()
 	$head[$h][2] = 'attributes_contacts';
 	$h++;
 
+	$head[$h][0] = DOL_URL_ROOT . '/societe/admin/societe_fields.php';
+	$head[$h][1] = $langs->trans("SetupFields");
+	$head[$h][2] = 'fields';
+	$h++;
+
 	complete_head_from_modules($conf, $langs, null, $head, $h, 'company_admin', 'remove');
 
 	return $head;

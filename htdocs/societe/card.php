@@ -38,6 +38,17 @@
  *  \brief      Third party card page
  */
 
+function field_should_be_displayed($object, string $field): bool
+{
+	$visibility = getDolGlobalString(
+		'MAIN_' . strtoupper($field) . '_FIELD_VISIBILITY',
+		$object->fields[$field]['visible']
+	);
+
+	return $visibility >= 1 && (!isset($object->fields[$field]['requiredModule']) || isModEnabled(
+				$object->fields[$field]['requiredModule']
+			));
+}
 
 // Load Dolibarr environment
 require '../main.inc.php';
@@ -1498,7 +1509,6 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($canvasdisplayactio
 			if (!getDolGlobalString('SOCIETE_DISABLE_CUSTOMERS')) {
 				print '<span id="spannature2" class="spannature customer-back paddinglarge marginrightonly"><label for="customerinput" class="valignmiddle">'.$langs->trans("Customer").'<input id="customerinput" class="flat checkforselect marginleftonly valignmiddle" type="checkbox" name="customer" value="1"'.($selectedcustomer ? ' checked="checked"' : '').'></label></span>';
 			}
-
 			if ((isModEnabled("fournisseur") && $user->hasRight('fournisseur', 'lire') && !getDolGlobalString('MAIN_USE_NEW_SUPPLIERMOD')) || (isModEnabled("supplier_order") && $user->hasRight('supplier_order', 'lire')) || (isModEnabled("supplier_invoice") && $user->hasRight('supplier_invoice', 'lire'))
 				|| (isModEnabled('supplier_proposal') && $user->hasRight('supplier_proposal', 'lire'))) {
 				// Supplier
@@ -2284,14 +2294,40 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($canvasdisplayactio
 				}
 
 				// Name
-				print '<tr><td class="titlefieldcreate">'.$form->editfieldkey('ThirdPartyName', 'name', '', $object, 0, 'string', '', 1).'</td>';
-				print '<td colspan="3"><input type="text" class="minwidth300" maxlength="128" name="name" id="name" value="'.dol_escape_htmltag($object->name).'" autofocus="autofocus">';
-				print $form->widgetForTranslation("name", $object, $permissiontoadd, 'string', 'alphanohtml', 'minwidth300');
-				print '</td></tr>';
+				if (field_should_be_displayed($object, 'nom')) {
+					print '<tr><td class="titlefieldcreate">' . $form->editfieldkey(
+							'ThirdPartyName',
+							'name',
+							'',
+							$object,
+							0,
+							'string',
+							'',
+							1
+						) . '</td>';
+					print '<td colspan="3"><input type="text" class="minwidth300" maxlength="128" name="name" id="name" value="' . dol_escape_htmltag(
+							$object->name
+						) . '" autofocus="autofocus">';
+					print $form->widgetForTranslation(
+						"name",
+						$object,
+						$permissiontoadd,
+						'string',
+						'alphanohtml',
+						'minwidth300'
+					);
+					print '</td></tr>';
+				}
 
 				// Alias names (commercial, trademark or alias names)
-				print '<tr id="name_alias"><td><label for="name_alias_input">'.$langs->trans('AliasNames').'</label></td>';
-				print '<td colspan="3"><input type="text" class="minwidth300" name="name_alias" id="name_alias_input" value="'.dol_escape_htmltag($object->name_alias).'"></td></tr>';
+				if (field_should_be_displayed($object, 'name_alias')) {
+					print '<tr id="name_alias"><td><label for="name_alias_input">' . $langs->trans(
+							'AliasNames'
+						) . '</label></td>';
+					print '<td colspan="3"><input type="text" class="minwidth300" name="name_alias" id="name_alias_input" value="' . dol_escape_htmltag(
+							$object->name_alias
+						) . '"></td></tr>';
+				}
 
 				// Prefix
 				if (getDolGlobalString('SOCIETE_USEPREFIX')) {  // Old not used prefix field
@@ -2424,7 +2460,7 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($canvasdisplayactio
 
 
 				// Barcode
-				if (isModEnabled('barcode')) {
+				if (field_should_be_displayed($object, 'barcode')) {
 					print '<tr><td class="tdtop">'.$form->editfieldkey('Gencod', 'barcode', '', $object, 0).'</td>';
 					print '<td colspan="3">';
 					print img_picto('', 'barcode', 'class="pictofixedwidth"');
@@ -2432,89 +2468,262 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($canvasdisplayactio
 					print '</td></tr>';
 				}
 
+
 				// Status
-				print '<tr><td>'.$form->editfieldkey('Status', 'status', '', $object, 0).'</td><td colspan="3">';
-				print $form->selectarray('status', array('0' => $langs->trans('ActivityCeased'), '1' => $langs->trans('InActivity')), $object->status, 0, 0, 0, '', 0, 0, 0, '', 'minwidth100', 1);
-				print '</td></tr>';
+				if (field_should_be_displayed($object, 'status')) {
+					print '<tr><td>' . $form->editfieldkey(
+							'Status',
+							'status',
+							'',
+							$object,
+							0
+						) . '</td><td colspan="3">';
+					print $form->selectarray(
+						'status',
+						array('0' => $langs->trans('ActivityCeased'), '1' => $langs->trans('InActivity')),
+						$object->status,
+						0,
+						0,
+						0,
+						'',
+						0,
+						0,
+						0,
+						'',
+						'minwidth100',
+						1
+					);
+					print '</td></tr>';
+				}
 
 				$colspan = ($conf->browser->layout == 'phone' ? 2 : 4);
 				print '<tr><td'.($colspan ? ' colspan="'.$colspan.'"' : '').'>&nbsp;</td></tr>';
 
-				// Address
-				print '<tr><td class="tdtop">'.$form->editfieldkey('Address', 'address', '', $object, 0).'</td>';
-				print '<td colspan="3"><textarea name="address" id="address" class="quatrevingtpercent" rows="3" wrap="soft">';
-				print dol_escape_htmltag($object->address, 0, 1);
-				print '</textarea>';
-				print $form->widgetForTranslation("address", $object, $permissiontoadd, 'textarea', 'alphanohtml', 'quatrevingtpercent');
-				print '</td></tr>';
-
-				// Zip / Town
-				print '<tr><td>'.$form->editfieldkey('Zip', 'zipcode', '', $object, 0).'</td><td'.($conf->browser->layout == 'phone' ? ' colspan="3"' : '').'>';
-				print $formcompany->select_ziptown($object->zip, 'zipcode', array('town', 'selectcountry_id', 'state_id'), 0, 0, '', 'maxwidth100');
-				print '</td>';
-				if ($conf->browser->layout == 'phone') {
-					print '</tr><tr>';
-				}
-				print '<td>'.$form->editfieldkey('Town', 'town', '', $object, 0).'</td><td'.($conf->browser->layout == 'phone' ? ' colspan="3"' : '').'>';
-				print $formcompany->select_ziptown($object->town, 'town', array('zipcode', 'selectcountry_id', 'state_id'));
-				print $form->widgetForTranslation("town", $object, $permissiontoadd, 'string', 'alphanohtml', 'maxwidth100 quatrevingtpercent');
-				print '</td></tr>';
-
-				// Country
-				print '<tr><td>'.$form->editfieldkey('Country', 'selectcounty_id', '', $object, 0).'</td><td colspan="3">';
-				print img_picto('', 'globe-americas', 'class="pictofixedwidth"');
-				print $form->select_country((GETPOSTISSET('country_id') ? GETPOST('country_id') : $object->country_id), 'country_id', '', 0, 'minwidth200 maxwidth400 widthcentpercentminusx');
-				if ($user->admin) {
-					print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"), 1);
-				}
-				print '</td></tr>';
-
-				// State
-				if (!getDolGlobalString('SOCIETE_DISABLE_STATE')) {
-					if ((getDolGlobalInt('MAIN_SHOW_REGION_IN_STATE_SELECT') == 1 || getDolGlobalInt('MAIN_SHOW_REGION_IN_STATE_SELECT') == 2)) {
-						print '<tr><td>'.$form->editfieldkey('Region-State', 'state_id', '', $object, 0).'</td><td colspan="3">';
-					} else {
-						print '<tr><td>'.$form->editfieldkey('State', 'state_id', '', $object, 0).'</td><td colspan="3">';
-					}
-
-					print img_picto('', 'state', 'class="pictofixedwidth"');
-					print $formcompany->select_state($object->state_id, $object->country_code, 'state_id', 'minwidth200 maxwidth400 widthcentpercentminusx');
+				if (field_should_be_displayed($object, 'address')) {
+					// Address
+					print '<tr><td class="tdtop">' . $form->editfieldkey(
+							'Address',
+							'address',
+							'',
+							$object,
+							0
+						) . '</td>';
+					print '<td colspan="3"><textarea name="address" id="address" class="quatrevingtpercent" rows="3" wrap="soft">';
+					print dol_escape_htmltag($object->address, 0, 1);
+					print '</textarea>';
+					print $form->widgetForTranslation(
+						"address",
+						$object,
+						$permissiontoadd,
+						'textarea',
+						'alphanohtml',
+						'quatrevingtpercent'
+					);
 					print '</td></tr>';
 				}
 
-				// Phone / Fax
-				print '<tr><td>'.$form->editfieldkey('Phone', 'phone', GETPOST('phone', 'alpha'), $object, 0).'</td>';
-				print '<td'.($conf->browser->layout == 'phone' ? ' colspan="3"' : '').'>'.img_picto('', 'object_phoning', 'class="pictofixedwidth"').' <input type="text" name="phone" id="phone" class="maxwidth200 widthcentpercentminusx" value="'.(GETPOSTISSET('phone') ? GETPOST('phone', 'alpha') : $object->phone).'"></td>';
-				if ($conf->browser->layout == 'phone') {
-					print '</tr><tr>';
+				// Zip / Town
+				if (field_should_be_displayed($object, 'zip') || field_should_be_displayed($object, 'town')) {
+					print '<tr>';
+					if (field_should_be_displayed($object, 'zip')) {
+						print '<td>' . $form->editfieldkey(
+								'Zip',
+								'zipcode',
+								'',
+								$object,
+								0
+							) . '</td><td' . ($conf->browser->layout == 'phone' ? ' colspan="3"' : '') . '>';
+						print $formcompany->select_ziptown(
+							$object->zip,
+							'zipcode',
+							array('town', 'selectcountry_id', 'state_id'),
+							0,
+							0,
+							'',
+							'maxwidth100'
+						);
+						print '</td>';
+						if ($conf->browser->layout == 'phone') {
+							print '</tr><tr>';
+						}
+					}
+					print '<td>' . $form->editfieldkey(
+							'Town',
+							'town',
+							'',
+							$object,
+							0
+						) . '</td><td' . ($conf->browser->layout == 'phone' ? ' colspan="3"' : '') . '>';
+					print $formcompany->select_ziptown(
+						$object->town,
+						'town',
+						array('zipcode', 'selectcountry_id', 'state_id')
+					);
+					print $form->widgetForTranslation(
+						"town",
+						$object,
+						$permissiontoadd,
+						'string',
+						'alphanohtml',
+						'maxwidth100 quatrevingtpercent'
+					);
+					print '</td></tr>';
 				}
-				print '<td>'.$form->editfieldkey('PhoneMobile', 'phone_mobile', GETPOST('phone_mobile', 'alpha'), $object, 0).'</td>';
-				print '<td'.($conf->browser->layout == 'phone' ? ' colspan="3"' : '').'>'.img_picto('', 'object_phoning_mobile', 'class="pictofixedwidth"').' <input type="text" name="phone_mobile" id="phone_mobile" class="maxwidth200 widthcentpercentminusx" value="'.(GETPOSTISSET('phone_mobile') ? GETPOST('phone_mobile', 'alpha') : $object->phone_mobile).'"></td></tr>';
 
-				print '<td>'.$form->editfieldkey('Fax', 'fax', GETPOST('fax', 'alpha'), $object, 0).'</td>';
-				print '<td'.($conf->browser->layout == 'phone' ? ' colspan="3"' : '').'>'.img_picto('', 'object_phoning_fax', 'class="pictofixedwidth"').' <input type="text" name="fax" id="fax" class="maxwidth200 widthcentpercentminusx" value="'.(GETPOSTISSET('fax') ? GETPOST('fax', 'alpha') : $object->fax).'"></td>';
-				print '</tr>';
+				// Country
+				if (field_should_be_displayed($object, 'fk_pays')) {
+					print '<tr><td>' . $form->editfieldkey(
+							'Country',
+							'selectcounty_id',
+							'',
+							$object,
+							0
+						) . '</td><td colspan="3">';
+					print img_picto('', 'globe-americas', 'class="pictofixedwidth"');
+					print $form->select_country(
+						(GETPOSTISSET('country_id') ? GETPOST('country_id') : $object->country_id),
+						'country_id',
+						'',
+						0,
+						'minwidth200 maxwidth400 widthcentpercentminusx'
+					);
+					if ($user->admin) {
+						print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"), 1);
+					}
+					print '</td></tr>';
+				}
+
+				// State
+				if (field_should_be_displayed($object, 'fk_departement')) {
+					if (!getDolGlobalString('SOCIETE_DISABLE_STATE')) {
+						if ((getDolGlobalInt('MAIN_SHOW_REGION_IN_STATE_SELECT') == 1 || getDolGlobalInt(
+								'MAIN_SHOW_REGION_IN_STATE_SELECT'
+							) == 2)) {
+							print '<tr><td>' . $form->editfieldkey(
+									'Region-State',
+									'state_id',
+									'',
+									$object,
+									0
+								) . '</td><td colspan="3">';
+						} else {
+							print '<tr><td>' . $form->editfieldkey(
+									'State',
+									'state_id',
+									'',
+									$object,
+									0
+								) . '</td><td colspan="3">';
+						}
+
+						print img_picto('', 'state', 'class="pictofixedwidth"');
+						print $formcompany->select_state(
+							$object->state_id,
+							$object->country_code,
+							'state_id',
+							'minwidth200 maxwidth400 widthcentpercentminusx'
+						);
+						print '</td></tr>';
+					}
+				}
+
+				// Phone / Fax
+				if (field_should_be_displayed($object, 'phone') || field_should_be_displayed(
+						$object,
+						'phone_mobile'
+					) || field_should_be_displayed($object, 'fax')) {
+					print '<tr>';
+					if (field_should_be_displayed($object, 'phone')) {
+						print '<td>' . $form->editfieldkey(
+								'Phone',
+								'phone',
+								GETPOST('phone', 'alpha'),
+								$object,
+								0
+							) . '</td>';
+					}
+					if (field_should_be_displayed($object, 'phone_mobile')) {
+						print '<td' . ($conf->browser->layout == 'phone' ? ' colspan="3"' : '') . '>' . img_picto(
+								'',
+								'object_phoning',
+								'class="pictofixedwidth"'
+							) . ' <input type="text" name="phone" id="phone" class="maxwidth200 widthcentpercentminusx" value="' . (GETPOSTISSET(
+								'phone'
+							) ? GETPOST('phone', 'alpha') : $object->phone) . '"></td>';
+						if ($conf->browser->layout == 'phone') {
+							print '</tr><tr>';
+						}
+						print '<td>' . $form->editfieldkey(
+								'PhoneMobile',
+								'phone_mobile',
+								GETPOST('phone_mobile', 'alpha'),
+								$object,
+								0
+							) . '</td>';
+					}
+					print '<td' . ($conf->browser->layout == 'phone' ? ' colspan="3"' : '') . '>' . img_picto(
+							'',
+							'object_phoning_mobile',
+							'class="pictofixedwidth"'
+						) . ' <input type="text" name="phone_mobile" id="phone_mobile" class="maxwidth200 widthcentpercentminusx" value="' . (GETPOSTISSET(
+							'phone_mobile'
+						) ? GETPOST('phone_mobile', 'alpha') : $object->phone_mobile) . '"></td></tr>';
+					if (field_should_be_displayed($object, 'fax')) {
+						print '<td>' . $form->editfieldkey('Fax', 'fax', GETPOST('fax', 'alpha'), $object, 0) . '</td>';
+						print '<td' . ($conf->browser->layout == 'phone' ? ' colspan="3"' : '') . '>' . img_picto(
+								'',
+								'object_phoning_fax',
+								'class="pictofixedwidth"'
+							) . ' <input type="text" name="fax" id="fax" class="maxwidth200 widthcentpercentminusx" value="' . (GETPOSTISSET(
+								'fax'
+							) ? GETPOST('fax', 'alpha') : $object->fax) . '"></td>';
+					}
+					print '</tr>';
+				}
 
 				// Web
-				print '<tr><td>'.$form->editfieldkey('Web', 'url', GETPOST('url', 'alpha'), $object, 0).'</td>';
-				print '<td colspan="3">'.img_picto('', 'globe', 'class="pictofixedwidth"').' <input type="text" name="url" id="url" class="maxwidth200onsmartphone maxwidth300 widthcentpercentminusx " value="'.(GETPOSTISSET('url') ? GETPOST('url', 'alpha') : $object->url).'"></td></tr>';
+				if (field_should_be_displayed($object, 'url')) {
+					print '<tr><td>' . $form->editfieldkey('Web', 'url', GETPOST('url', 'alpha'), $object, 0) . '</td>';
+					print '<td colspan="3">' . img_picto(
+							'',
+							'globe',
+							'class="pictofixedwidth"'
+						) . ' <input type="text" name="url" id="url" class="maxwidth200onsmartphone maxwidth300 widthcentpercentminusx " value="' . (GETPOSTISSET(
+							'url'
+						) ? GETPOST('url', 'alpha') : $object->url) . '"></td></tr>';
+				}
 
 				// EMail
-				print '<tr><td>'.$form->editfieldkey('EMail', 'email', GETPOST('email', 'alpha'), $object, 0, 'string', '', (getDolGlobalString('SOCIETE_EMAIL_MANDATORY'))).'</td>';
-				print '<td'.(($conf->browser->layout == 'phone') || !isModEnabled('mailing') ? ' colspan="3"' : '').'>';
-				print img_picto('', 'object_email', 'class="pictofixedwidth"');
-				print '<input type="text" name="email" id="email" class="maxwidth500 widthcentpercentminusx" value="'.(GETPOSTISSET('email') ? GETPOST('email', 'alpha') : $object->email).'">';
-				print '</td>';
+				print '<tr>';
+				if (field_should_be_displayed($object, 'email')) {
+					print '<td>' . $form->editfieldkey(
+							'EMail',
+							'email',
+							GETPOST('email', 'alpha'),
+							$object,
+							0,
+							'string',
+							'',
+							(getDolGlobalString('SOCIETE_EMAIL_MANDATORY'))
+						) . '</td>';
+					print '<td' . (($conf->browser->layout == 'phone') || !isModEnabled(
+							'mailing'
+						) ? ' colspan="3"' : '') . '>';
+					print img_picto('', 'object_email', 'class="pictofixedwidth"');
+					print '<input type="text" name="email" id="email" class="maxwidth500 widthcentpercentminusx" value="' . (GETPOSTISSET(
+							'email'
+						) ? GETPOST('email', 'alpha') : $object->email) . '">';
+					print '</td>';
 
-				// Unsubscribe
-				if (isModEnabled('mailing')) {
-					if ($conf->browser->layout == 'phone') {
-						print '</tr><tr>';
-					}
-					if ($conf->use_javascript_ajax && getDolGlobalInt('MAILING_CONTACT_DEFAULT_BULK_STATUS') == 2) {
-						print "\n".'<script type="text/javascript">'."\n";
+					// Unsubscribe
+					if (isModEnabled('mailing')) {
+						if ($conf->browser->layout == 'phone') {
+							print '</tr><tr>';
+						}
+						if ($conf->use_javascript_ajax && getDolGlobalInt('MAILING_CONTACT_DEFAULT_BULK_STATUS') == 2) {
+							print "\n" . '<script type="text/javascript">' . "\n";
 
-						print '
+							print '
 						jQuery(document).ready(function () {
 							function init_check_no_email(input) {
 								if (input.val()!="") {
@@ -2527,30 +2736,41 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($canvasdisplayactio
 								init_check_no_email($(this));
 							});
 							init_check_no_email($("#email"));
-						})'."\n";
-						print '</script>'."\n";
-					}
-					if (!GETPOSTISSET("no_email") && !empty($object->email)) {
-						$result = $object->getNoEmail();
-						if ($result < 0) {
-							setEventMessages($object->error, $object->errors, 'errors');
+						})' . "\n";
+							print '</script>' . "\n";
 						}
+						if (!GETPOSTISSET("no_email") && !empty($object->email)) {
+							$result = $object->getNoEmail();
+							if ($result < 0) {
+								setEventMessages($object->error, $object->errors, 'errors');
+							}
+						}
+						print '<td class="noemail"><label for="no_email">' . $langs->trans(
+							"No_Email"
+							) . '</label></td>';
+						print '<td>';
+						$useempty = (getDolGlobalInt('MAILING_CONTACT_DEFAULT_BULK_STATUS') == 2);
+						print $form->selectyesno(
+							'no_email',
+							(GETPOSTISSET("no_email") ? GETPOSTINT("no_email") : $object->no_email),
+							1,
+							false,
+							$useempty
+						);
+						print '</td>';
 					}
-					print '<td class="noemail"><label for="no_email">'.$langs->trans("No_Email").'</label></td>';
-					print '<td>';
-					$useempty = (getDolGlobalInt('MAILING_CONTACT_DEFAULT_BULK_STATUS') == 2);
-					print $form->selectyesno('no_email', (GETPOSTISSET("no_email") ? GETPOSTINT("no_email") : $object->no_email), 1, false, $useempty);
-					print '</td>';
 				}
 				print '</tr>';
 
 				// Social network
-				if (isModEnabled('socialnetworks')) {
-					$colspan = ($conf->browser->layout == 'phone' ? 2 : 4);
+				if (field_should_be_displayed($object, 'socialnetworks')) {
+					if (isModEnabled('socialnetworks')) {
+						$colspan = ($conf->browser->layout == 'phone' ? 2 : 4);
 
-					$object->showSocialNetwork($socialnetworks, $colspan);
+						$object->showSocialNetwork($socialnetworks, $colspan);
 
-					print '<tr><td'.($colspan ? ' colspan="'.$colspan.'"' : '').'><hr></td></tr>';
+						print '<tr><td' . ($colspan ? ' colspan="' . $colspan . '"' : '') . '><hr></td></tr>';
+					}
 				}
 
 				// Prof ids
@@ -2560,22 +2780,47 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($canvasdisplayactio
 				$NBPROFIDMIN = getDolGlobalInt('THIRDPARTY_MIN_NB_PROF_ID', 2);
 				$NBPROFIDMAX = getDolGlobalInt('THIRDPARTY_MAX_NB_PROF_ID', 6);
 				while ($i <= $NBPROFIDMAX) {
-					$idprof = $langs->transcountry('ProfId'.$i, $object->country_code);
-					if ($idprof != '-' && ($i <= $NBPROFIDMIN || !empty($langs->tab_translate['ProfId'.$i.$object->country_code]))) {
-						$key = 'idprof'.$i;
+					$fieldCode = 'idprof' . $i;
+					switch ($fieldCode) {
+						case 'idprof1':
+							$fieldCode = 'siren';
+							break;
+						case 'idprof2':
+							$fieldCode = 'siret';
+							break;
+						case 'idprof3':
+							$fieldCode = 'ape';
+							break;
+						default:
+							break;
+					}
+					if (field_should_be_displayed($object, $fieldCode)) {
+						$idprof = $langs->transcountry('ProfId' . $i, $object->country_code);
+						if ($idprof != '-' && ($i <= $NBPROFIDMIN || !empty($langs->tab_translate['ProfId' . $i . $object->country_code]))) {
+							$key = 'idprof' . $i;
 
-						if (($j % $NBCOLS) == 0) {
-							print '<tr>';
-						}
+							if (($j % $NBCOLS) == 0) {
+								print '<tr>';
+							}
 
-						$idprof_mandatory = 'SOCIETE_IDPROF'.($i).'_MANDATORY';
-						print '<td>'.$form->editfieldkey($idprof, $key, '', $object, 0, 'string', '', !(empty($conf->global->$idprof_mandatory) || !$object->isACompany())).'</td><td>';
-						print $formcompany->get_input_id_prof($i, $key, $object->$key, $object->country_code);
-						print '</td>';
-						if (($j % $NBCOLS) == ($NBCOLS - 1)) {
-							print '</tr>';
+							$idprof_mandatory = 'SOCIETE_IDPROF' . ($i) . '_MANDATORY';
+							print '<td>' . $form->editfieldkey(
+									$idprof,
+									$key,
+									'',
+									$object,
+									0,
+									'string',
+									'',
+									!(empty($conf->global->$idprof_mandatory) || !$object->isACompany())
+								) . '</td><td>';
+							print $formcompany->get_input_id_prof($i, $key, $object->$key, $object->country_code);
+							print '</td>';
+							if (($j % $NBCOLS) == ($NBCOLS - 1)) {
+								print '</tr>';
+							}
+							$j++;
 						}
-						$j++;
 					}
 					$i++;
 				}
@@ -2584,9 +2829,17 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($canvasdisplayactio
 				}
 
 				// VAT is used
-				print '<tr><td>'.$form->editfieldkey('VATIsUsed', 'assujtva_value', '', $object, 0).'</td><td colspan="3">';
-				print '<input id="assujtva_value" name="assujtva_value" type="checkbox" ' . ($object->tva_assuj ? 'checked="checked"' : '') . ' value="1">';
-				print '</td></tr>';
+				if (field_should_be_displayed($object, 'tva_assuj')) {
+					print '<tr><td>' . $form->editfieldkey(
+							'VATIsUsed',
+							'assujtva_value',
+							'',
+							$object,
+							0
+						) . '</td><td colspan="3">';
+					print '<input id="assujtva_value" name="assujtva_value" type="checkbox" ' . ($object->tva_assuj ? 'checked="checked"' : '') . ' value="1">';
+					print '</td></tr>';
+				}
 
 				// Local Taxes
 				//TODO: Place into a function to control showing by country or study better option
@@ -2636,86 +2889,193 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($canvasdisplayactio
 				}
 
 				// VAT Code
-				print '<tr><td>'.$form->editfieldkey('VATIntra', 'intra_vat', '', $object, 0).'</td>';
-				print '<td colspan="3">';
-				$s = '<input type="text" class="flat maxwidthonsmartphone" name="tva_intra" id="intra_vat" maxlength="20" value="'.$object->tva_intra.'">';
+				if (field_should_be_displayed($object, 'tva_intra')) {
+					print '<tr><td>' . $form->editfieldkey('VATIntra', 'intra_vat', '', $object, 0) . '</td>';
+					print '<td colspan="3">';
+					$s = '<input type="text" class="flat maxwidthonsmartphone" name="tva_intra" id="intra_vat" maxlength="20" value="' . $object->tva_intra . '">';
 
-				if (!getDolGlobalString('MAIN_DISABLEVATCHECK') && isInEEC($object)) {
-					$s .= ' &nbsp; ';
+					if (!getDolGlobalString('MAIN_DISABLEVATCHECK') && isInEEC($object)) {
+						$s .= ' &nbsp; ';
 
-					if ($conf->use_javascript_ajax) {
-						$widthpopup = 600;
-						if (!empty($conf->dol_use_jmobile)) {
-							$widthpopup = 350;
-						}
-						$heightpopup = 400;
-						print "\n";
-						print '<script type="text/javascript">';
-						print "function CheckVAT(a) {\n";
-						if ($mysoc->country_code == 'GR' && $object->country_code == 'GR' && !empty($u)) {
-							print "GRVAT(a,'{$u}','{$p}','{$myafm}');\n";
+						if ($conf->use_javascript_ajax) {
+							$widthpopup = 600;
+							if (!empty($conf->dol_use_jmobile)) {
+								$widthpopup = 350;
+							}
+							$heightpopup = 400;
+							print "\n";
+							print '<script type="text/javascript">';
+							print "function CheckVAT(a) {\n";
+							if ($mysoc->country_code == 'GR' && $object->country_code == 'GR' && !empty($u)) {
+								print "GRVAT(a,'{$u}','{$p}','{$myafm}');\n";
+							} else {
+								print "newpopup('" . DOL_URL_ROOT . "/societe/checkvat/checkVatPopup.php?vatNumber='+a, '" . dol_escape_js(
+									$langs->trans("VATIntraCheckableOnEUSite")
+								) . "', " . $widthpopup . ", " . $heightpopup . ");\n";
+							}
+							print "}\n";
+							print '</script>';
+							print "\n";
+							$s .= '<a href="#" class="hideonsmartphone" onclick="CheckVAT(document.formsoc.tva_intra.value);">' . $langs->trans(
+								"VATIntraCheck"
+								) . '</a>';
+							$s = $form->textwithpicto(
+								$s,
+								$langs->trans("VATIntraCheckDesc", $langs->transnoentitiesnoconv("VATIntraCheck")),
+								1
+							);
 						} else {
-							print "newpopup('".DOL_URL_ROOT."/societe/checkvat/checkVatPopup.php?vatNumber='+a, '".dol_escape_js($langs->trans("VATIntraCheckableOnEUSite"))."', ".$widthpopup.", ".$heightpopup.");\n";
+							$s .= '<a href="' . $langs->transcountry(
+								"VATIntraCheckURL",
+								$object->country_id
+							) . '" class="hideonsmartphone" target="_blank" rel="noopener noreferrer">' . img_picto(
+								$langs->trans("VATIntraCheckableOnEUSite"),
+								'help'
+							) . '</a>';
 						}
-						print "}\n";
-						print '</script>';
-						print "\n";
-						$s .= '<a href="#" class="hideonsmartphone" onclick="CheckVAT(document.formsoc.tva_intra.value);">'.$langs->trans("VATIntraCheck").'</a>';
-						$s = $form->textwithpicto($s, $langs->trans("VATIntraCheckDesc", $langs->transnoentitiesnoconv("VATIntraCheck")), 1);
-					} else {
-						$s .= '<a href="'.$langs->transcountry("VATIntraCheckURL", $object->country_id).'" class="hideonsmartphone" target="_blank" rel="noopener noreferrer">'.img_picto($langs->trans("VATIntraCheckableOnEUSite"), 'help').'</a>';
 					}
+					print $s;
+					print '</td>';
+					print '</tr>';
 				}
-				print $s;
-				print '</td>';
-				print '</tr>';
 
 				// Type - Workforce/Staff
-				print '<tr><td>'.$form->editfieldkey('ThirdPartyType', 'typent_id', '', $object, 0).'</td><td class="maxwidthonsmartphone"'.(($conf->browser->layout == 'phone' || getDolGlobalString('SOCIETE_DISABLE_WORKFORCE')) ? ' colspan="3"' : '').'>';
-				print $form->selectarray("typent_id", $formcompany->typent_array(0), $object->typent_id, 1, 0, 0, '', 0, 0, 0, (!getDolGlobalString('SOCIETE_SORT_ON_TYPEENT') ? 'ASC' : $conf->global->SOCIETE_SORT_ON_TYPEENT), '', 1);
-				if ($user->admin) {
-					print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"), 1);
-				}
-				if (!getDolGlobalString('SOCIETE_DISABLE_WORKFORCE')) {
-					print '</td>';
-					if ($conf->browser->layout == 'phone') {
-						print '</tr><tr>';
+				if (field_should_be_displayed($object, 'fk_typent') || field_should_be_displayed(
+						$object,
+						'fk_effectif'
+					)) {
+					print '<tr>';
+					if (field_should_be_displayed($object, 'fk_typent')) {
+						print '<td>' . $form->editfieldkey(
+								'ThirdPartyType',
+								'typent_id',
+								'',
+								$object,
+								0
+							) . '</td><td class="maxwidthonsmartphone"' . (($conf->browser->layout == 'phone' || getDolGlobalString(
+									'SOCIETE_DISABLE_WORKFORCE'
+								)) ? ' colspan="3"' : '') . '>';
+						print $form->selectarray(
+							"typent_id",
+							$formcompany->typent_array(0),
+							$object->typent_id,
+							1,
+							0,
+							0,
+							'',
+							0,
+							0,
+							0,
+							(!getDolGlobalString(
+								'SOCIETE_SORT_ON_TYPEENT'
+							) ? 'ASC' : $conf->global->SOCIETE_SORT_ON_TYPEENT),
+							'',
+							1
+						);
+						if ($user->admin) {
+							print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"), 1);
+						}
 					}
-					print '<td>'.$form->editfieldkey('Workforce', 'effectif_id', '', $object, 0).'</td><td class="maxwidthonsmartphone">';
-					print $form->selectarray("effectif_id", $formcompany->effectif_array(0), $object->effectif_id, 0, 0, 0, '', 0, 0, 0, '', '', 1);
-					if ($user->admin) {
-						print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"), 1);
+					if (field_should_be_displayed($object, 'fk_effectif')) {
+						if (!getDolGlobalString('SOCIETE_DISABLE_WORKFORCE')) {
+							print '</td>';
+							if ($conf->browser->layout == 'phone') {
+								print '</tr><tr>';
+							}
+							print '<td>' . $form->editfieldkey(
+									'Workforce',
+									'effectif_id',
+									'',
+									$object,
+									0
+								) . '</td><td class="maxwidthonsmartphone">';
+							print $form->selectarray(
+								"effectif_id",
+								$formcompany->effectif_array(0),
+								$object->effectif_id,
+								0,
+								0,
+								0,
+								'',
+								0,
+								0,
+								0,
+								'',
+								'',
+								1
+							);
+							if ($user->admin) {
+								print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"), 1);
+							}
+						} else {
+							print '<input type="hidden" name="effectif_id" id="effectif_id" value="' . $object->effectif_id . '">';
+						}
+						print '</td>';
 					}
-				} else {
-					print '<input type="hidden" name="effectif_id" id="effectif_id" value="'.$object->effectif_id.'">';
+					print '</tr>';
 				}
-				print '</td></tr>';
 
 				// Juridical type
-				print '<tr><td>'.$form->editfieldkey('JuridicalStatus', 'forme_juridique_code', '', $object, 0).'</td><td class="maxwidthonsmartphone" colspan="3">';
-				print $formcompany->select_juridicalstatus($object->forme_juridique_code, $object->country_code, '', 'forme_juridique_code');
-				print '</td></tr>';
+				if (field_should_be_displayed($object, 'fk_forme_juridique')) {
+					print '<tr><td>' . $form->editfieldkey(
+							'JuridicalStatus',
+							'forme_juridique_code',
+							'',
+							$object,
+							0
+						) . '</td><td class="maxwidthonsmartphone" colspan="3">';
+					print $formcompany->select_juridicalstatus(
+						$object->forme_juridique_code,
+						$object->country_code,
+						'',
+						'forme_juridique_code'
+					);
+					print '</td></tr>';
+				}
 
 				// Capital
-				print '<tr><td>'.$form->editfieldkey('Capital', 'capital', '', $object, 0).'</td>';
-				print '<td colspan="3"><input type="text" name="capital" id="capital" size="10" value="';
-				print $object->capital != '' && $object->capital != 0 ? dol_escape_htmltag(price($object->capital)) : '';
-				if (isModEnabled("multicurrency")) {
-					print '"> <span class="hideonsmartphone">'.$langs->trans("Currency".$object->multicurrency_code).'</span></td></tr>';
-				} else {
-					print '"> <span class="hideonsmartphone">'.$langs->trans("Currency".$conf->currency).'</span></td></tr>';
+				if (field_should_be_displayed($object, 'capital')) {
+					print '<tr><td>' . $form->editfieldkey('Capital', 'capital', '', $object, 0) . '</td>';
+					print '<td colspan="3"><input type="text" name="capital" id="capital" size="10" value="';
+					print $object->capital != '' && $object->capital != 0 ? dol_escape_htmltag(
+						price($object->capital)
+					) : '';
+					if (isModEnabled("multicurrency")) {
+						print '"> <span class="hideonsmartphone">' . $langs->trans(
+								"Currency" . $object->multicurrency_code
+							) . '</span></td></tr>';
+					} else {
+						print '"> <span class="hideonsmartphone">' . $langs->trans(
+								"Currency" . $conf->currency
+							) . '</span></td></tr>';
+					}
 				}
 
 				// Default language
-				if (getDolGlobalInt('MAIN_MULTILANGS')) {
-					print '<tr><td>'.$form->editfieldkey('DefaultLang', 'default_lang', '', $object, 0).'</td><td colspan="3">'."\n";
-					print img_picto('', 'language', 'class="pictofixedwidth"').$formadmin->select_language($object->default_lang, 'default_lang', 0, array(), '1', 0, 0, 'maxwidth300 widthcentpercentminusx');
+				if (getDolGlobalInt('MAIN_MULTILANGS') && field_should_be_displayed($object, 'default_lang')) {
+					print '<tr><td>' . $form->editfieldkey(
+							'DefaultLang',
+							'default_lang',
+							'',
+							$object,
+							0
+						) . '</td><td colspan="3">' . "\n";
+					print img_picto('', 'language', 'class="pictofixedwidth"') . $formadmin->select_language(
+							$object->default_lang,
+							'default_lang',
+							0,
+							array(),
+							'1',
+							0,
+							0,
+							'maxwidth300 widthcentpercentminusx'
+						);
 					print '</td>';
 					print '</tr>';
 				}
 
 				// Incoterms
-				if (isModEnabled('incoterm')) {
+				if (field_should_be_displayed($object, 'fk_incoterms')) {
 					print '<tr>';
 					print '<td>'.$form->editfieldkey('IncotermLabel', 'incoterm_id', '', $object, 0).'</td>';
 					print '<td colspan="3" class="maxwidthonsmartphone">';
@@ -2755,12 +3115,21 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($canvasdisplayactio
 				}
 
 				// Multicurrency
-				if (isModEnabled("multicurrency")) {
+				if (field_should_be_displayed($object, 'multicurrency_code')) {
 					print '<tr>';
-					print '<td>'.$form->editfieldkey('Currency', 'multicurrency_code', '', $object, 0).'</td>';
+					print '<td>' . $form->editfieldkey('Currency', 'multicurrency_code', '', $object, 0) . '</td>';
 					print '<td colspan="3" class="maxwidthonsmartphone">';
 					print img_picto('', 'currency', 'class="pictofixedwidth"');
-					print $form->selectMultiCurrency((GETPOSTISSET('multicurrency_code') ? GETPOST('multicurrency_code') : ($object->multicurrency_code ? $object->multicurrency_code : $conf->currency)), 'multicurrency_code', 1, '', false, 'maxwidth150 widthcentpercentminusx');
+					print $form->selectMultiCurrency(
+						(GETPOSTISSET('multicurrency_code') ? GETPOST(
+							'multicurrency_code'
+						) : ($object->multicurrency_code ? $object->multicurrency_code : $conf->currency)),
+						'multicurrency_code',
+						1,
+						'',
+						false,
+						'maxwidth150 widthcentpercentminusx'
+					);
 					print '</td></tr>';
 				}
 
@@ -2769,55 +3138,101 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($canvasdisplayactio
 				include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_edit.tpl.php';
 
 				// Parent company
-				if (!getDolGlobalString('SOCIETE_DISABLE_PARENTCOMPANY')) {
-					print '<tr>';
-					print '<td>'.$langs->trans('ParentCompany').'</td>';
-					print '<td colspan="3" class="maxwidthonsmartphone">';
-					print img_picto('', 'company', 'class="pictofixedwidth"');
-					print $form->select_company(GETPOST('parent_company_id') ? GETPOST('parent_company_id') : $object->parent, 'parent_company_id', '', 'SelectThirdParty', 0, 0, array(), 0, 'minwidth300 maxwidth500 widthcentpercentminusxx');
-					print '</td></tr>';
+				if (field_should_be_displayed($object, 'parent')) {
+					if (!getDolGlobalString('SOCIETE_DISABLE_PARENTCOMPANY')) {
+						print '<tr>';
+						print '<td>' . $langs->trans('ParentCompany') . '</td>';
+						print '<td colspan="3" class="maxwidthonsmartphone">';
+						print img_picto('', 'company', 'class="pictofixedwidth"');
+						print $form->select_company(
+							GETPOST('parent_company_id') ? GETPOST('parent_company_id') : $object->parent,
+							'parent_company_id',
+							'',
+							'SelectThirdParty',
+							0,
+							0,
+							array(),
+							0,
+							'minwidth300 maxwidth500 widthcentpercentminusxx'
+						);
+						print '</td></tr>';
+					}
 				}
 
 				// Logo
-				print '<tr class="hideonsmartphone">';
-				print '<td>'.$form->editfieldkey('Logo', 'photoinput', '', $object, 0).'</td>';
-				print '<td colspan="3">';
-				if ($object->logo) {
-					print $form->showphoto('societe', $object, 100, 0, 0, 'inline-block');
-				}
-				$caneditfield = 1;
-				if ($caneditfield) {
+				if (field_should_be_displayed($object, 'logo')) {
+					print '<tr class="hideonsmartphone">';
+					print '<td>' . $form->editfieldkey('Logo', 'photoinput', '', $object, 0) . '</td>';
+					print '<td colspan="3">';
 					if ($object->logo) {
-						print "<br>\n";
+						print $form->showphoto('societe', $object, 100, 0, 0, 'inline-block');
 					}
-					print '<table class="nobordernopadding">';
-					if ($object->logo) {
-						print '<tr><td><input type="checkbox" class="flat photodelete" name="deletephoto" id="photodelete"> <label for="photodelete">'.$langs->trans("Delete").'</photo><br></td></tr>';
+					$caneditfield = 1;
+					if ($caneditfield) {
+						if ($object->logo) {
+							print "<br>\n";
+						}
+						print '<table class="nobordernopadding">';
+						if ($object->logo) {
+							print '<tr><td><input type="checkbox" class="flat photodelete" name="deletephoto" id="photodelete"> <label for="photodelete">' . $langs->trans(
+									"Delete"
+								) . '</photo><br></td></tr>';
+						}
+						//print '<tr><td>'.$langs->trans("PhotoFile").'</td></tr>';
+						print '<tr><td>';
+						$maxfilesizearray = getMaxFileSizeArray();
+						$maxmin = $maxfilesizearray['maxmin'];
+						if ($maxmin > 0) {
+							print '<input type="hidden" name="MAX_FILE_SIZE" value="' . ($maxmin * 1024) . '">';    // MAX_FILE_SIZE must precede the field type=file
+						}
+						print '<input type="file" class="flat" name="photo" id="photoinput">';
+						print '</td></tr>';
+						print '</table>';
 					}
-					//print '<tr><td>'.$langs->trans("PhotoFile").'</td></tr>';
-					print '<tr><td>';
-					$maxfilesizearray = getMaxFileSizeArray();
-					$maxmin = $maxfilesizearray['maxmin'];
-					if ($maxmin > 0) {
-						print '<input type="hidden" name="MAX_FILE_SIZE" value="'.($maxmin * 1024).'">';	// MAX_FILE_SIZE must precede the field type=file
-					}
-					print '<input type="file" class="flat" name="photo" id="photoinput">';
-					print '</td></tr>';
-					print '</table>';
+					print '</td>';
+					print '</tr>';
 				}
-				print '</td>';
-				print '</tr>';
 
 				// Assign sale representative
 				print '<tr>';
-				print '<td>'.$form->editfieldkey('AllocateCommercial', 'commercial_id', '', $object, 0).'</td>';
+				print '<td>' . $form->editfieldkey('AllocateCommercial', 'commercial_id', '', $object, 0) . '</td>';
 				print '<td colspan="3" class="maxwidthonsmartphone">';
-				$userlist = $form->select_dolusers('', '', 0, null, 0, '', '', 0, 0, 0, 'AND u.statut = 1', 0, '', '', 0, 1);
+				$userlist = $form->select_dolusers(
+					'',
+					'',
+					0,
+					null,
+					0,
+					'',
+					'',
+					0,
+					0,
+					0,
+					'AND u.statut = 1',
+					0,
+					'',
+					'',
+					0,
+					1
+				);
 				$arrayselected = GETPOST('commercial', 'array');
 				if (empty($arrayselected)) {
 					$arrayselected = $object->getSalesRepresentatives($user, 1);
 				}
-				print img_picto('', 'user', 'class="pictofixedwidth"').$form->multiselectarray('commercial', $userlist, $arrayselected, 0, 0, 'quatrevingtpercent widthcentpercentminusx', 0, 0, '', '', '', 1);
+				print img_picto('', 'user', 'class="pictofixedwidth"') . $form->multiselectarray(
+						'commercial',
+						$userlist,
+						$arrayselected,
+						0,
+						0,
+						'quatrevingtpercent widthcentpercentminusx',
+						0,
+						0,
+						'',
+						'',
+						'',
+						1
+					);
 				print '</td></tr>';
 
 				print '</table>';

@@ -177,44 +177,182 @@ class Societe extends CommonObject
 	 */
 
 	/**
-	 * @var array<string,array{type:string,label:string,enabled:int<0,2>|string,position:int,notnull?:int,visible:int<-2,5>|string,noteditable?:int<0,1>,default?:string,index?:int,foreignkey?:string,searchall?:int<0,1>,isameasure?:int<0,1>,css?:string,csslist?:string,help?:string,showoncombobox?:int<0,2>,disabled?:int<0,1>,arrayofkeyval?:array<int|string,string>,comment?:string,validate?:int<0,1>}>  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
+	 * @var array<string,array{type:string,label:string,enabled:int<0,2>|string,position:int,notnull?:int,visible:int<-2,5>|string,noteditable?:int<0,1>,default?:string,index?:int,foreignkey?:string,searchall?:int<0,1>,isameasure?:int<0,1>,css?:string,csslist?:string,help?:string,showoncombobox?:int<0,2>,disabled?:int<0,1>,arrayofkeyval?:array<int|string,string>,comment?:string,validate?:int<0,1>,required?:int<0,1>,requiredModule?:string}>  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
 	public $fields = array(
-		'rowid' => array('type' => 'integer', 'label' => 'TechnicalID', 'enabled' => 1, 'visible' => -2, 'noteditable' => 1, 'notnull' => 1, 'index' => 1, 'position' => 1, 'comment' => 'Id', 'css' => 'left'),
-		'parent' => array('type' => 'integer', 'label' => 'Parent', 'enabled' => 1, 'visible' => -1, 'position' => 20),
+		'rowid' => array(
+			'type' => 'integer',
+			'label' => 'TechnicalID',
+			'enabled' => 1,
+			'visible' => -2,
+			'noteditable' => 1,
+			'notnull' => 1,
+			'index' => 1,
+			'position' => 1,
+			'comment' => 'Id',
+			'css' => 'left',
+			'required' => 1
+		),
+		'parent' => array('type' => 'integer', 'label' => 'Parent', 'enabled' => 1, 'visible' => 1, 'position' => 20),
 		'tms' => array('type' => 'timestamp', 'label' => 'DateModification', 'enabled' => 1, 'visible' => -1, 'notnull' => 1, 'position' => 25),
 		'datec' => array('type' => 'datetime', 'label' => 'DateCreation', 'enabled' => 1, 'visible' => -1, 'position' => 30),
-		'nom' => array('type' => 'varchar(128)', 'length' => 128, 'label' => 'Nom', 'enabled' => 1, 'visible' => -1, 'position' => 35, 'showoncombobox' => 1, 'csslist' => 'tdoverflowmax150'),
-		'name_alias' => array('type' => 'varchar(128)', 'label' => 'Name alias', 'enabled' => 1, 'visible' => -1, 'position' => 36, 'showoncombobox' => 2),
+		'nom' => array(
+			'type' => 'varchar(128)',
+			'length' => 128,
+			'label' => 'Nom',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 35,
+			'showoncombobox' => 1,
+			'csslist' => 'tdoverflowmax150'
+		),
+		'name_alias' => array(
+			'type' => 'varchar(128)',
+			'label' => 'Name alias',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 36,
+			'showoncombobox' => 2
+		),
 		'entity' => array('type' => 'integer', 'label' => 'Entity', 'default' => '1', 'enabled' => 1, 'visible' => -2, 'notnull' => 1, 'position' => 40, 'index' => 1),
 		'ref_ext' => array('type' => 'varchar(255)', 'label' => 'RefExt', 'enabled' => 1, 'visible' => 0, 'position' => 45),
 		'code_client' => array('type' => 'varchar(24)', 'label' => 'CustomerCode', 'enabled' => 1, 'visible' => -1, 'position' => 55),
 		'code_fournisseur' => array('type' => 'varchar(24)', 'label' => 'SupplierCode', 'enabled' => 1, 'visible' => -1, 'position' => 60),
 		'code_compta' => array('type' => 'varchar(24)', 'label' => 'CustomerAccountancyCode', 'enabled' => 1, 'visible' => -1, 'position' => 65),
 		'code_compta_fournisseur' => array('type' => 'varchar(24)', 'label' => 'SupplierAccountancyCode', 'enabled' => 1, 'visible' => -1, 'position' => 70),
-		'address' => array('type' => 'varchar(255)', 'label' => 'Address', 'enabled' => 1, 'visible' => -1, 'position' => 75),
-		'zip' => array('type' => 'varchar(25)', 'label' => 'Zip', 'enabled' => 1, 'visible' => -1, 'position' => 80),
-		'town' => array('type' => 'varchar(50)', 'label' => 'Town', 'enabled' => 1, 'visible' => -1, 'position' => 85),
-		'fk_departement' => array('type' => 'integer', 'label' => 'State', 'enabled' => 1, 'visible' => -1, 'position' => 90),
-		'fk_pays' => array('type' => 'integer:Ccountry:core/class/ccountry.class.php', 'label' => 'Country', 'enabled' => 1, 'visible' => -1, 'position' => 95),
-		'phone' => array('type' => 'varchar(20)', 'label' => 'Phone', 'enabled' => 1, 'visible' => -1, 'position' => 100),
-		'phone_mobile' => array('type' => 'varchar(20)', 'label' => 'PhoneMobile', 'enabled' => 1, 'visible' => -1, 'position' => 102),
-		'fax' => array('type' => 'varchar(20)', 'label' => 'Fax', 'enabled' => 1, 'visible' => -1, 'position' => 105),
-		'url' => array('type' => 'varchar(255)', 'label' => 'Url', 'enabled' => 1, 'visible' => -1, 'position' => 110),
-		'email' => array('type' => 'varchar(128)', 'label' => 'Email', 'enabled' => 1, 'visible' => -1, 'position' => 115),
-		'socialnetworks' => array('type' => 'text', 'label' => 'Socialnetworks', 'enabled' => 1, 'visible' => -1, 'position' => 120),
-		'fk_effectif' => array('type' => 'integer', 'label' => 'Workforce', 'enabled' => 1, 'visible' => -1, 'position' => 170),
-		'fk_typent' => array('type' => 'integer', 'label' => 'TypeOfCompany', 'enabled' => 1, 'visible' => -1, 'position' => 175, 'csslist' => 'minwidth200'),
-		'fk_forme_juridique' => array('type' => 'integer', 'label' => 'JuridicalStatus', 'enabled' => 1, 'visible' => -1, 'position' => 180),
+		'address' => array(
+			'type' => 'varchar(255)',
+			'label' => 'Address',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 75
+		),
+		'zip' => array('type' => 'varchar(25)', 'label' => 'Zip', 'enabled' => 1, 'visible' => 1, 'position' => 80),
+		'town' => array('type' => 'varchar(50)', 'label' => 'Town', 'enabled' => 1, 'visible' => 1, 'position' => 85),
+		'fk_departement' => array(
+			'type' => 'integer',
+			'label' => 'State',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 90
+		),
+		'fk_pays' => array(
+			'type' => 'integer:Ccountry:core/class/ccountry.class.php',
+			'label' => 'Country',
+			'enabled' => 1,
+			'visible' => -1,
+			'position' => 95
+		),
+		'phone' => array(
+			'type' => 'varchar(20)',
+			'label' => 'Phone',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 100
+		),
+		'phone_mobile' => array(
+			'type' => 'varchar(20)',
+			'label' => 'PhoneMobile',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 102
+		),
+		'fax' => array('type' => 'varchar(20)', 'label' => 'Fax', 'enabled' => 1, 'visible' => 1, 'position' => 105),
+		'url' => array('type' => 'varchar(255)', 'label' => 'Url', 'enabled' => 1, 'visible' => 1, 'position' => 110),
+		'email' => array(
+			'type' => 'varchar(128)',
+			'label' => 'Email',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 115
+		),
+		'socialnetworks' => array(
+			'type' => 'text',
+			'label' => 'Socialnetworks',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 120,
+			'requiredModule' => 'socialnetworks'
+		),
+		'fk_effectif' => array(
+			'type' => 'integer',
+			'label' => 'Workforce',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 170
+		),
+		'fk_typent' => array(
+			'type' => 'integer',
+			'label' => 'TypeOfCompany',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 175,
+			'csslist' => 'minwidth200'
+		),
+		'fk_forme_juridique' => array(
+			'type' => 'integer',
+			'label' => 'JuridicalStatus',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 180
+		),
 		'fk_currency' => array('type' => 'varchar(3)', 'label' => 'Currency', 'enabled' => 1, 'visible' => -1, 'position' => 185),
-		'siren' => array('type' => 'varchar(128)', 'label' => 'Idprof1', 'enabled' => 1, 'visible' => -1, 'position' => 190),
-		'siret' => array('type' => 'varchar(128)', 'label' => 'Idprof2', 'enabled' => 1, 'visible' => -1, 'position' => 195),
-		'ape' => array('type' => 'varchar(128)', 'label' => 'Idprof3', 'enabled' => 1, 'visible' => -1, 'position' => 200),
-		'idprof4' => array('type' => 'varchar(128)', 'label' => 'Idprof4', 'enabled' => 1, 'visible' => -1, 'position' => 205),
-		'idprof5' => array('type' => 'varchar(128)', 'label' => 'Idprof5', 'enabled' => 1, 'visible' => -1, 'position' => 206),
-		'idprof6' => array('type' => 'varchar(128)', 'label' => 'Idprof6', 'enabled' => 1, 'visible' => -1, 'position' => 207),
-		'tva_intra' => array('type' => 'varchar(20)', 'label' => 'Tva intra', 'enabled' => 1, 'visible' => -1, 'position' => 210),
-		'capital' => array('type' => 'double(24,8)', 'label' => 'Capital', 'enabled' => 1, 'visible' => -1, 'position' => 215),
+		'siren' => array(
+			'type' => 'varchar(128)',
+			'label' => 'Idprof1',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 190
+		),
+		'siret' => array(
+			'type' => 'varchar(128)',
+			'label' => 'Idprof2',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 195
+		),
+		'ape' => array(
+			'type' => 'varchar(128)',
+			'label' => 'Idprof3',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 200
+		),
+		'idprof4' => array(
+			'type' => 'varchar(128)',
+			'label' => 'Idprof4',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 205
+		),
+		'idprof5' => array(
+			'type' => 'varchar(128)',
+			'label' => 'Idprof5',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 206
+		),
+		'idprof6' => array(
+			'type' => 'varchar(128)',
+			'label' => 'Idprof6',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 207
+		),
+		'tva_intra' => array(
+			'type' => 'varchar(20)',
+			'label' => 'Tva intra',
+			'enabled' => 1,
+			'visible' => -1,
+			'position' => 210
+		),
+		'capital' => array(
+			'type' => 'double(24,8)',
+			'label' => 'Capital',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 215
+		),
 		'fk_stcomm' => array('type' => 'integer', 'label' => 'CommercialStatus', 'enabled' => 1, 'visible' => -1, 'notnull' => 1, 'position' => 220),
 		'note_public' => array('type' => 'html', 'label' => 'NotePublic', 'enabled' => 1, 'visible' => 0, 'position' => 225),
 		'note_private' => array('type' => 'html', 'label' => 'NotePrivate', 'enabled' => 1, 'visible' => 0, 'position' => 230),
@@ -239,28 +377,61 @@ class Societe extends CommonObject
 		'order_min_amount' => array('type' => 'double(24,8)', 'label' => 'Order min amount', 'enabled' => 'isModEnabled("order") && !empty($conf->global->ORDER_MANAGE_MIN_AMOUNT)', 'visible' => -1, 'position' => 315, 'isameasure' => 1),
 		'supplier_order_min_amount' => array('type' => 'double(24,8)', 'label' => 'Supplier order min amount', 'enabled' => 'isModEnabled("order") && !empty($conf->global->ORDER_MANAGE_MIN_AMOUNT)', 'visible' => -1, 'position' => 320, 'isameasure' => 1),
 		'fk_shipping_method' => array('type' => 'integer', 'label' => 'Fk shipping method', 'enabled' => 1, 'visible' => -1, 'position' => 330),
-		'tva_assuj' => array('type' => 'tinyint(4)', 'label' => 'Tva assuj', 'enabled' => 1, 'visible' => -1, 'position' => 335),
+		'tva_assuj' => array(
+			'type' => 'tinyint(4)',
+			'label' => 'Tva assuj',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 335
+		),
 		'localtax1_assuj' => array('type' => 'tinyint(4)', 'label' => 'Localtax1 assuj', 'enabled' => 1, 'visible' => -1, 'position' => 340),
 		'localtax1_value' => array('type' => 'double(6,3)', 'label' => 'Localtax1 value', 'enabled' => 1, 'visible' => -1, 'position' => 345),
 		'localtax2_assuj' => array('type' => 'tinyint(4)', 'label' => 'Localtax2 assuj', 'enabled' => 1, 'visible' => -1, 'position' => 350),
 		'localtax2_value' => array('type' => 'double(6,3)', 'label' => 'Localtax2 value', 'enabled' => 1, 'visible' => -1, 'position' => 355),
 		'vat_reverse_charge' => array('type' => 'tinyint(4)', 'label' => 'Vat reverse charge', 'enabled' => 1, 'visible' => -1, 'position' => 335),
-		'barcode' => array('type' => 'varchar(255)', 'label' => 'Barcode', 'enabled' => 1, 'visible' => -1, 'position' => 360),
+		'barcode' => array(
+			'type' => 'varchar(255)',
+			'label' => 'Barcode',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 360,
+			'requiredModule' => 'barcode'
+		),
 		'price_level' => array('type' => 'integer', 'label' => 'Price level', 'enabled' => '$conf->global->PRODUIT_MULTIPRICES || getDolGlobalString("PRODUIT_CUSTOMER_PRICES_BY_QTY_MULTIPRICES") || getDolGlobalString("PRODUIT_CUSTOMER_PRICES_AND_MULTIPRICES")', 'visible' => -1, 'position' => 365),
-		'default_lang' => array('type' => 'varchar(6)', 'label' => 'Default lang', 'enabled' => 1, 'visible' => -1, 'position' => 370),
+		'default_lang' => array(
+			'type' => 'varchar(6)',
+			'label' => 'Default lang',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 370
+		),
 		'canvas' => array('type' => 'varchar(32)', 'label' => 'Canvas', 'enabled' => 1, 'visible' => -1, 'position' => 375),
 		'fk_barcode_type' => array('type' => 'integer', 'label' => 'Fk barcode type', 'enabled' => 1, 'visible' => -1, 'position' => 405),
 		'webservices_url' => array('type' => 'varchar(255)', 'label' => 'Webservices url', 'enabled' => 1, 'visible' => -1, 'position' => 410),
 		'webservices_key' => array('type' => 'varchar(128)', 'label' => 'Webservices key', 'enabled' => 1, 'visible' => -1, 'position' => 415),
-		'fk_incoterms' => array('type' => 'integer', 'label' => 'Fk incoterms', 'enabled' => 1, 'visible' => -1, 'position' => 425),
+		'fk_incoterms' => array(
+			'type' => 'integer',
+			'label' => 'Fk incoterms',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 425,
+			'requiredModule' => 'incoterms'
+		),
 		'location_incoterms' => array('type' => 'varchar(255)', 'label' => 'Location incoterms', 'enabled' => 1, 'visible' => -1, 'position' => 430),
 		'model_pdf' => array('type' => 'varchar(255)', 'label' => 'Model pdf', 'enabled' => 1, 'visible' => 0, 'position' => 435),
 		'last_main_doc' => array('type' => 'varchar(255)', 'label' => 'LastMainDoc', 'enabled' => 1, 'visible' => -1, 'position' => 270),
 		'fk_multicurrency' => array('type' => 'integer', 'label' => 'Fk multicurrency', 'enabled' => 1, 'visible' => -1, 'position' => 440),
-		'multicurrency_code' => array('type' => 'varchar(255)', 'label' => 'Multicurrency code', 'enabled' => 1, 'visible' => -1, 'position' => 445),
+		'multicurrency_code' => array(
+			'type' => 'varchar(255)',
+			'label' => 'Multicurrency code',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 445,
+			'requiredModule' => 'multicurrency'
+		),
 		'fk_account' => array('type' => 'integer', 'label' => 'PaymentBankAccount', 'enabled' => 1, 'visible' => -1, 'position' => 450),
 		'fk_warehouse' => array('type' => 'integer', 'label' => 'Warehouse', 'enabled' => 1, 'visible' => -1, 'position' => 455),
-		'logo' => array('type' => 'varchar(255)', 'label' => 'Logo', 'enabled' => 1, 'visible' => -1, 'position' => 400),
+		'logo' => array('type' => 'varchar(255)', 'label' => 'Logo', 'enabled' => 1, 'visible' => 1, 'position' => 400),
 		'logo_squarred' => array('type' => 'varchar(255)', 'label' => 'Logo squarred', 'enabled' => 1, 'visible' => -1, 'position' => 401),
 		'status' => array('type' => 'tinyint(4)', 'label' => 'Status', 'enabled' => 1, 'visible' => -1, 'position' => 500),
 		'import_key' => array('type' => 'varchar(14)', 'label' => 'ImportId', 'enabled' => 1, 'visible' => -2, 'position' => 1000),
